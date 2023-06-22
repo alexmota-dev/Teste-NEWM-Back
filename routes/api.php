@@ -10,11 +10,11 @@ use Illuminate\Support\Facades\Route;
 //     return $request->user();
 // });
 
-Route::get('v1/funcionario', [ClientController::class, 'index']);
-Route::post('v1/funcionario', [ClientController::class, 'store']);
-Route::get('v1/funcionario/{id}', [ClientController::class, 'show']);
+Route::get('v1/client', [ClientController::class, 'index']);
+Route::post('v1/client', [ClientController::class, 'store']);
+Route::get('v1/client/{id}', [ClientController::class, 'show']);
 Route::get('v1/searchforclientsbyemail/{email}', [ClientController::class, 'SearchFor10UsersByEmail']);
 Route::get('v1/searchforclientsbyname/{name}', [ClientController::class, 'SearchFor10UsersByName']);
-Route::delete('v1/funcionario/{id}', [ClientController::class, 'destroy']);
-Route::put('v1/funcionario/{id}', [ClientController::class, 'update']);
+Route::delete('v1/client/{id}', [ClientController::class, 'destroy']);
+Route::put('v1/client/{id}', [ClientController::class, 'update']);
 
