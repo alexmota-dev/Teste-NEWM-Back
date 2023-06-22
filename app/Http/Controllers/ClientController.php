@@ -42,14 +42,19 @@ class ClientController extends Controller
     public function store(){
         // $body = (json_decode(file_get_contents('php://input'),false))->body;
         $body = json_decode(file_get_contents('php://input'), true);
-        if(isset($body['name']) && isset($body['birth']) && isset($body['phone']) && isset($body['cpf']) && isset($body['email']) && isset($body['address']) && isset($body['observation'])){
+        if(isset($body['observation'])){
+            $observation = $body["observation"];
+        }
+        else{
+            $observation = null;
+        }
+        if(isset($body['name']) && isset($body['birth']) && isset($body['phone']) && isset($body['cpf']) && isset($body['email']) && isset($body['address'])){
             $name = $body["name"];
             $birth = $body["birth"];
             $phone = $body["phone"];
             $cpf = $body["cpf"];
             $email = $body["email"];
             $address = $body["address"];
-            $observation = $body["observation"];
             $birthArray = explode("-",$birth);
             if($birthArray[1] > 12){
                 http_response_code(400);
@@ -82,7 +87,8 @@ class ClientController extends Controller
         $cmd->bindValue(":cpf",$cpf);
         $cmd->bindValue(":email",$email);
         $cmd->bindValue(":address",$address);
-        $cmd->bindValue(":observation",$observation);
+        // PDO::PARAM_NULL indica que observation pode ser null
+        $cmd->bindValue(":observation",$observation, PDO::PARAM_NULL);
 
         $cmd->execute();
 
