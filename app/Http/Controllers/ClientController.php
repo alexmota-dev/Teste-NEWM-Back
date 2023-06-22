@@ -71,6 +71,10 @@ class ClientController extends Controller
             http_response_code(400);
             die("Faltam dados na requisição. Verifique os campos.");
         }
+        if(strlen($phone) > 11 || strlen($cpf) > 11){
+            http_response_code(400);
+            die("Verifique se os campos CPF/Telefone tem um tamanho adequado.");
+        }
 
         $pdo = new Connect();
         $existisFuncionario = $this->findByEmail($email);
