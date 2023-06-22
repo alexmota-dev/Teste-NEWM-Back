@@ -35,6 +35,10 @@ class ClientController extends Controller
         return(json_encode($clients));
     }
 
+    public function verifyCPF($cpf){
+            $cpf = str_replace([" ", "-", "."], "", $cpf);
+            return $cpf;
+    }
     public function store(){
         // $body = (json_decode(file_get_contents('php://input'),false))->body;
         $body = json_decode(file_get_contents('php://input'), true);
@@ -106,13 +110,13 @@ class ClientController extends Controller
         if($funcionario){
             $this->closeConnection($pdo);
             http_response_code(200);
-            // $this->addHeaders();
+            $this->addHeaders();
             die(json_encode($funcionario));
         }
         else{
             $this->closeConnection($pdo);
             http_response_code(404);
-            // $this->addHeaders();
+            $this->addHeaders();
             die("Não existe funcionario com o id ". $id);
         }
         //consigo acessar $funcionario->name, formato: Obj.
@@ -274,7 +278,13 @@ class ClientController extends Controller
                 // $this->addHeaders();
                 die("O dia não pode ultrapassar 31");
             }
-            //aqui
+            $alreadyExistsUserWithEmail = $this->findByEmail($email);
+            if($alreadyExistsUserWithEmail && $alreadyExistsUserWithEmail->email != $userExists["email"] ){
+                http_response_code(409);
+                die("Já existe user com este email !");
+            }
+            $cpf = $this->verifyCPF($cpf);
+            var_dump($cpf);
             $cmd = $pdo->
             prepare(
                     "UPDATE clients
@@ -299,7 +309,7 @@ class ClientController extends Controller
         }else {
             $this->closeConnection($pdo);
                 http_response_code(400);
-                // $this->addHeaders();
+                $this->addHeaders();
                 die("Solicitação incorreta, corpo da requisição está errado.");
         }
     }
