@@ -17,11 +17,15 @@ class Connect {
 
    function connectDatabase() {
         try {
-            $this->connection = new PDO('pgsql:host='.HOST.';dbname='.DATABASENAME, USER, PASSWORD);
+            $this->connection = new PDO('mysql:dbname='.DATABASENAME.';host='.HOST, USER, PASSWORD);
         }
         catch (\PDOException $pdoError) {
             throw $pdoError;
         }
+    }
+
+    function closeConection(){
+        $this->connection = null;
     }
 }
 
