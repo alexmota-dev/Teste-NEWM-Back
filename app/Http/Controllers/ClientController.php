@@ -1,11 +1,11 @@
 <?php
 
 namespace App\Http\Controllers;
+require_once '../Database/Conection/Conection.php';
 use Database\Conection\Connect;
 use PDO;
-// require_once '../Database/Conection/Conection.php';
 
-class EmployeeController extends Controller
+class ClientController extends Controller
 {
     public function closeConnection($pdo){
         $pdo = NULL;
@@ -20,14 +20,15 @@ class EmployeeController extends Controller
     }
     public function index(){
         //abrindo a conexão com o banco
-        $startConection = new Connect();
-        $query = "SELECT * FROM clients";
-        $cmd = $startConection->connection->query($query);
+        $testConnection = new Connect;
+        // $cmd = $testConnection->connection->query($query);
         //selecionando todos os funcionairos
+        $query = "SELECT * FROM clients";
+        $cmd = $testConnection->connection->query($query);
         //convertendo para obj
         $clients = $cmd->fetchAll(PDO::FETCH_OBJ);
         //fechando a conexão com o banco
-        $this->closeConnection($startConection);
+        // $this->closeConnection($testConnection);
         // return $clients;
         //qual a dirença exata de usar um return ou die ?
         // $this->addHeaders();
@@ -62,14 +63,15 @@ class EmployeeController extends Controller
             die("Faltam dados na requisição. Verifique os campos.");
         }
 
-
-        try {
-            $pdo = new PDO('mysql:dbname=terceirotestenewm; host=localhost', "root", "root");
-        } catch (\PDOException $pdoError) {
-            throw $pdoError;
+        $pdo = new Connect();
+        $existisFuncionario = $this->findByEmail($email);
+        if($existisFuncionario){
+            http_response_code(409);
+            die("Existe funcionario com o email ". $email);
         }
+        $query = "INSERT INTO clients (name, birth, phone, cpf, email, address, observation) VALUES (:name, :birth, :phone, :cpf, :email, :address, :observation)";
+        $cmd = $pdo->connection->prepare($query);
 
-        $cmd = $pdo->prepare("INSERT INTO clients (name, birth, phone, cpf, email, address, observation) VALUES (:name, :birth, :phone, :cpf, :email, :address, :observation)");
         $cmd->bindValue(":name",$name);
         $cmd->bindValue(":birth",$birth);
         $cmd->bindValue(":phone",$phone);
@@ -116,6 +118,92 @@ class EmployeeController extends Controller
         //consigo acessar $funcionario->name, formato: Obj.
     }
 
+    public function findByEmail($email){
+        try {
+            $pdo = new PDO('mysql:dbname=terceirotestenewm; host=localhost', "root", "root");
+        } catch (\PDOException $pdoError) {
+            throw $pdoError;
+        }
+        // esse trecho se repete no show e no destroy
+        $cmd = $pdo->prepare('SELECT * FROM clients WHERE email = :email');
+        // SELECT * FROM clients WHERE name LIKE CONCAT(:name, '%');
+        // na busca pelo name eu posso usar isso
+        $cmd->bindValue(":email",$email);
+        $cmd->execute();
+        $funcionario = $cmd->fetch(PDO::FETCH_OBJ);
+        if($funcionario){
+            $this->closeConnection($pdo);
+            http_response_code(200);
+            // $this->addHeaders();
+            return $funcionario;
+        }
+        else{
+            $this->closeConnection($pdo);
+            http_response_code(404);
+            // $this->addHeaders();
+            return 0;
+        }
+        //consigo acessar $funcionario->name, formato: Obj.
+    }
+
+    public function SearchFor10UsersByEmail($email){
+        try {
+            $pdo = new PDO('mysql:dbname=terceirotestenewm; host=localhost', "root", "root");
+        } catch (\PDOException $pdoError) {
+            throw $pdoError;
+        }
+        // esse trecho se repete no show e no destroy
+        $cmd = $pdo->prepare('SELECT * FROM clients WHERE email LIKE :email LIMIT 10');
+        // SELECT * FROM clients WHERE name LIKE CONCAT(:name, '%');
+        // ^^^^^^
+        // na busca pelo name eu posso usar isso
+        $cmd->bindValue(":email",$email."%");
+        $cmd->execute();
+        $funcionario = $cmd->fetchAll(PDO::FETCH_OBJ);
+        if($funcionario){
+            $this->closeConnection($pdo);
+            http_response_code(200);
+            // $this->addHeaders();
+            die(json_encode($funcionario));
+        }
+        else{
+            $this->closeConnection($pdo);
+            http_response_code(404);
+            // $this->addHeaders();
+            die("Não existe funcionario com o email ". $email);
+        }
+        //consigo acessar $funcionario->name, formato: Obj.
+    }
+
+    public function SearchFor10UsersByName($name){
+        try {
+            $pdo = new PDO('mysql:dbname=terceirotestenewm; host=localhost', "root", "root");
+        } catch (\PDOException $pdoError) {
+            throw $pdoError;
+        }
+        // esse trecho se repete no show e no destroy
+        $cmd = $pdo->prepare('SELECT * FROM clients WHERE name LIKE :name LIMIT 10');
+        // SELECT * FROM clients WHERE name LIKE CONCAT(:name, '%');
+        // ^^^^^^
+        // na busca pelo name eu posso usar isso
+        $cmd->bindValue(":name",$name."%");
+        $cmd->execute();
+        $funcionario = $cmd->fetchAll(PDO::FETCH_OBJ);
+        if($funcionario){
+            $this->closeConnection($pdo);
+            http_response_code(200);
+            // $this->addHeaders();
+            die(json_encode($funcionario));
+        }
+        else{
+            $this->closeConnection($pdo);
+            http_response_code(404);
+            // $this->addHeaders();
+            die("Não existe funcionario com o name ". $name);
+        }
+        //consigo acessar $funcionario->name, formato: Obj.
+    }
+
     public function destroy($id){
         try {
             $pdo = new PDO('mysql:dbname=terceirotestenewm; host=127.0.0.1', "root", "root");
@@ -158,7 +246,7 @@ class EmployeeController extends Controller
         if(!$userExists){
             $this->closeConnection($pdo);
             http_response_code(404);
-            // $this->addHeaders();
+            $this->addHeaders();
             die("Não existe funcionario com o id ". $id);
         }
 
@@ -186,7 +274,7 @@ class EmployeeController extends Controller
                 // $this->addHeaders();
                 die("O dia não pode ultrapassar 31");
             }
-
+            //aqui
             $cmd = $pdo->
             prepare(
                     "UPDATE clients
@@ -206,7 +294,7 @@ class EmployeeController extends Controller
 
             $this->closeConnection($pdo);
             http_response_code(200);
-            // $this->addHeaders();
+            $this->addHeaders();
             die("Funcionario atualizado com sucesso.");
         }else {
             $this->closeConnection($pdo);
