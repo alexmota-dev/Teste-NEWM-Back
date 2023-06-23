@@ -78,13 +78,13 @@ class ClientController extends Controller
         }
 
         $startConnection = new Connect();
-        $existisFuncionario = $this->findByEmail($email);
-        if($existisFuncionario){
+        $existisClient = $this->findByEmail($email);
+        if($existisClient){
             // fechando conexão por uma questão de segurança
             $this->closeConnection($startConnection);
             $response = array(
                 'status' => 409,
-                'message' => "Já existe funcionario com o email".$email
+                'message' => "Já existe um cliente com este email !"
             );
             $json_response = json_encode($response);
             return $json_response;
@@ -134,18 +134,18 @@ class ClientController extends Controller
         $cmd->execute();
         // fechando conexão por uma questão de segurança
         $this->closeConnection($startConnection);
-        $funcionario = $cmd->fetch(PDO::FETCH_OBJ);
-        if($funcionario){
+        $client = $cmd->fetch(PDO::FETCH_OBJ);
+        if($client){
             http_response_code(200);
             $this->addHeaders();
-            die(json_encode($funcionario));
+            die(json_encode($client));
         }
         else{
             http_response_code(404);
             $this->addHeaders();
             $response = array(
                 'status' => 404,
-                'message' => "Não existe funcionario com esse id."
+                'message' => "Não existe cliente com esse id."
             );
             $json_response = json_encode($response);
             return $json_response;
@@ -160,19 +160,34 @@ class ClientController extends Controller
         $cmd->execute();
         // fechando conexão por uma questão de segurança
         $this->closeConnection($startConnection);
-        $funcionario = $cmd->fetch(PDO::FETCH_OBJ);
-        if($funcionario){
+        $client = $cmd->fetch(PDO::FETCH_OBJ);
+        if($client){
             http_response_code(200);
             // $this->addHeaders();
-            return $funcionario;
+            return $client;
         }
         else{
-            http_response_code(404);
-            // $this->addHeaders();
             return 0;
         }
     }
 
+    public function findByCPF($cpf){
+        $startConnection = new Connect();
+        $query = 'SELECT * FROM clients WHERE cpf = :cpf';
+        $cmd = $startConnection->connection->prepare($query);
+        $cmd->bindValue(":cpf",$cpf);
+        $cmd->execute();
+        // fechando conexão por uma questão de segurança
+        $this->closeConnection($startConnection);
+        $client = $cmd->fetch(PDO::FETCH_OBJ);
+        if($client){
+            http_response_code(200);
+            return $client;
+        }
+        else{
+            return 0;
+        }
+    }
     public function SearchFor10UsersByEmail($email){
         $startConnection = new Connect();
         $query = 'SELECT * FROM clients WHERE email LIKE :email LIMIT 10';
@@ -182,16 +197,20 @@ class ClientController extends Controller
         $cmd->execute();
         // fechando conexão por uma questão de segurança
         $this->closeConnection($startConnection);
-        $funcionario = $cmd->fetchAll(PDO::FETCH_OBJ);
-        if($funcionario){
+        $client = $cmd->fetchAll(PDO::FETCH_OBJ);
+        if($client){
             http_response_code(200);
             // $this->addHeaders();
-            die(json_encode($funcionario));
+            die(json_encode($client));
         }
         else{
             http_response_code(404);
-            // $this->addHeaders();
-            die("Não existe funcionario com o email ". $email);
+            $response = array(
+                'status' => 404,
+                'message' => "Não existe cliente com o email" . $email
+            );
+            $json_response = json_encode($response);
+            return $json_response;
         }
     }
 
@@ -203,18 +222,15 @@ class ClientController extends Controller
         $cmd->execute();
         // fechando conexão por uma questão de segurança
         $this->closeConnection($startConnection);
-        $funcionario = $cmd->fetchAll(PDO::FETCH_OBJ);
-        if($funcionario){
+        $client = $cmd->fetchAll(PDO::FETCH_OBJ);
+        if($client){
             http_response_code(200);
-            // $this->addHeaders();
-            die(json_encode($funcionario));
+            die(json_encode($client));
         }
         else{
             http_response_code(404);
-            // $this->addHeaders();
-            die("Não existe funcionario com o name ". $name);
+            die("Não existe cliente com o name ". $name);
         }
-        //consigo acessar $funcionario->name, formato: Obj.
     }
 
     public function destroy($id){
@@ -262,7 +278,7 @@ class ClientController extends Controller
             $this->closeConnection($startConnection);
             $response = array(
                 'status' => 404,
-                'message' => "Não existe funcionario com o id ". $id
+                'message' => "Não existe cliente com o id ". $id
             );
             $json_response = json_encode($response);
             return $json_response;
@@ -312,7 +328,17 @@ class ClientController extends Controller
                 return $json_response;
             }
             $cpf = $this->verifyCPF($cpf);
-
+            $alreadyExistsUserWithCPF = $this->findByCPF($cpf);
+            if($alreadyExistsUserWithCPF && $alreadyExistsUserWithCPF->cpf != $userExists["cpf"] ){
+                // fechando conexão por uma questão de segurança
+                $this->closeConnection($startConnection);
+                $response = array(
+                    'status' => 409,
+                    'message' => 'Já existe user com este CPF !'
+                );
+                $json_response = json_encode($response);
+                return $json_response;
+            }
             //verifica o tamanho de todos os campos
             if(strlen($phone) > 11 || strlen($cpf) > 11 || strlen($name) > 50 || strlen($email) > 50 || strlen($address) > 50 || strlen($observation) > 300){
                 // fechando conexão por uma questão de segurança
@@ -347,7 +373,7 @@ class ClientController extends Controller
             $this->closeConnection($startConnection);
             $response = array(
                 'status' => 200,
-                'message' => 'Funcionario atualizado com sucesso.'
+                'message' => 'Cliente atualizado com sucesso.'
             );
             $json_response = json_encode($response);
             return $json_response;
