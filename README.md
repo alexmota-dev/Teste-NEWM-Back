@@ -67,6 +67,6 @@ php artisan key:generate
 ### Este comando não vai influenciar diretamente no processo de execução de uma aplicação simples como essa, mas mesmo assim é importante mantermos a segurança.
 ## Iniciar o Projeto
 ```bash
-app php artisan serve
+php artisan serve
 ```
 
