@@ -2,6 +2,7 @@
 
 namespace Database;
 use Database\Conection\Connect;
+require_once "Conection\Conection.php";
 use PDO;
 
 class ClientRepository{
