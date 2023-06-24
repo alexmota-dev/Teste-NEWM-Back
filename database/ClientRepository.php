@@ -6,7 +6,7 @@ use PDO;
 
 class ClientRepository{
 
-    public function createClient($client){
+    public function create($client){
         $startConnection = new Connect();
         $query = "INSERT INTO clients (name, birth, phone, cpf, email, address, observation) VALUES (:name, :birth, :phone, :cpf, :email, :address, :observation)";
         $cmd = $startConnection->connection->prepare($query);
@@ -23,7 +23,7 @@ class ClientRepository{
         return $client;
     }
 
-    public function updateClient($client){
+    public function update($client){
         $startConnection = new Connect();
         $query ="UPDATE clients
                 SET name = :name, birth = :birth, phone = :phone, cpf = :cpf,
@@ -44,7 +44,16 @@ class ClientRepository{
         return $client;
     }
 
-    public function findByAllClients(){
+    public function delete($id){
+        $startConnection = new Connect();
+        $query = "DELETE FROM clients WHERE id = :id";
+        $cmd = $startConnection->connection->prepare($query);
+        $cmd->bindValue(":id",$id);
+        $cmd->execute();
+        return;
+    }
+
+    public function findByAll(){
         $startConnection = new Connect;
         $query = "SELECT * FROM clients";
         $cmd = $startConnection->connection->query($query);
