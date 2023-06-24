@@ -30,10 +30,6 @@ class ClientController extends Controller
         }
     }
 
-    public function verifyCPF($cpf){
-        $cpf = str_replace([" ", "-", "."], "", $cpf);
-        return $cpf;
-    }
     public function store(){
         $body = json_decode(file_get_contents('php://input'), true);
         try {
@@ -92,50 +88,6 @@ class ClientController extends Controller
         }
         else{
             return 0;
-        }
-    }
-    public function SearchFor10UsersByEmail($email){
-        $startConnection = new Connect();
-        $query = 'SELECT * FROM clients WHERE email LIKE :email LIMIT 10';
-        $cmd = $startConnection->connection->prepare($query);
-
-        $cmd->bindValue(":email",$email."%");
-        $cmd->execute();
-        // fechando conexão por uma questão de segurança
-        $this->closeConnection($startConnection);
-        $client = $cmd->fetchAll(PDO::FETCH_OBJ);
-        if($client){
-            http_response_code(200);
-            // $this->addHeaders();
-            die(json_encode($client));
-        }
-        else{
-            http_response_code(404);
-            $response = array(
-                'status' => 404,
-                'message' => "Não existe cliente com o email" . $email
-            );
-            $json_response = json_encode($response);
-            return $json_response;
-        }
-    }
-
-    public function SearchFor10UsersByName($name){
-        $startConnection = new Connect();
-        $query = 'SELECT * FROM clients WHERE name LIKE :name LIMIT 10';
-        $cmd = $startConnection->connection->prepare($query);
-        $cmd->bindValue(":name",$name."%");
-        $cmd->execute();
-        // fechando conexão por uma questão de segurança
-        $this->closeConnection($startConnection);
-        $client = $cmd->fetchAll(PDO::FETCH_OBJ);
-        if($client){
-            http_response_code(200);
-            die(json_encode($client));
-        }
-        else{
-            http_response_code(404);
-            die("Não existe cliente com o name ". $name);
         }
     }
 
