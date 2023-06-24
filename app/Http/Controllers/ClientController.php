@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 require_once '../Database/Conection/Conection.php';
+use App\Providers\Service\ClientService;
 use Database\Conection\Connect;
+use Exception;
 use PDO;
 
 class ClientController extends Controller
@@ -19,136 +21,40 @@ class ClientController extends Controller
         header('Access-Control-Allow-Headers: Content-Type');
     }
     public function index(){
-        //abrindo a conexão com o banco
-        $startConnection = new Connect;
-        $query = "SELECT * FROM clients";
-        $cmd = $startConnection->connection->query($query);
-        //fechando conexão por uma questão de segurança
-        $this->closeConnection($startConnection);
-        //convertendo para obj
-        $clients = $cmd->fetchAll(PDO::FETCH_OBJ);
-        return(json_encode($clients));
+        try {
+            $clientService = new ClientService();
+            $clients = $clientService->findAllClients();
+            return(json_encode($clients));
+        } catch (Exception $th) {
+            return $th->getMessage();
+        }
     }
 
     public function verifyCPF($cpf){
-            $cpf = str_replace([" ", "-", "."], "", $cpf);
-            return $cpf;
+        $cpf = str_replace([" ", "-", "."], "", $cpf);
+        return $cpf;
     }
     public function store(){
         $body = json_decode(file_get_contents('php://input'), true);
-        if(isset($body['observation'])){
-            $observation = $body["observation"];
+        try {
+            $clientService = new ClientService();
+            $client = $clientService->checkBodyIntegrity($body);
+            $clientService->emailIsUnique($client['email']);
+            $clientService->cpfIsUnique($client['cpf']);
+            $clientService->validatesSize($client);
+            $response = $clientService->createClient($client);
+        } catch (Exception $th) {
+            return $th->getMessage();
         }
-        else{
-            $observation = null;
-        }
-        if(isset($body['name']) && isset($body['birth']) && isset($body['phone']) && isset($body['cpf']) && isset($body['email']) && isset($body['address'])){
-            $name = $body["name"];
-            $birth = $body["birth"];
-            $phone = $body["phone"];
-            $cpf = $body["cpf"];
-            $email = $body["email"];
-            $address = $body["address"];
-            $birthArray = explode("-",$birth);
-            if($birthArray[1] > 12){
-                $response = array(
-                    'status' => 400,
-                    'message' => 'O mês não pode ultrapassar 12'
-                );
-                $json_response = json_encode($response);
-                return $json_response;
-            }
-            if($birthArray[2] > 31){
-                http_response_code(400);
-                $response = array(
-                    'status' => 400,
-                    'message' => 'O dia não pode ultrapassar 31'
-                );
-                $json_response = json_encode($response);
-                return $json_response;
-            }
-        }
-        else{
-            $response = array(
-                'status' => 400,
-                'message' => 'Faltam dados na requisição. Verifique os campos.'
-            );
-            $json_response = json_encode($response);
-            return $json_response;
-        }
-
-        $startConnection = new Connect();
-        $existisClient = $this->findByEmail($email);
-        if($existisClient){
-            // fechando conexão por uma questão de segurança
-            $this->closeConnection($startConnection);
-            $response = array(
-                'status' => 409,
-                'message' => "Já existe um cliente com este email !"
-            );
-            $json_response = json_encode($response);
-            return $json_response;
-        }
-        //Validando cpf antes de verificar tamanho
-        $cpf = $this->verifyCPF($cpf);
-        //verifica o tamanho de todos os campos
-        if(strlen($phone) > 11 || strlen($cpf) > 11 || strlen($name) > 50 || strlen($email) > 50 || strlen($address) > 50 || strlen($observation) > 300){
-            // fechando conexão por uma questão de segurança
-            $this->closeConnection($startConnection);
-            $response = array(
-                'status' => 400,
-                'message' => "Verifique o tamanho dos campos."
-            );
-            $json_response = json_encode($response);
-            return $json_response;
-        }
-        $query = "INSERT INTO clients (name, birth, phone, cpf, email, address, observation) VALUES (:name, :birth, :phone, :cpf, :email, :address, :observation)";
-        $cmd = $startConnection->connection->prepare($query);
-
-        $cmd->bindValue(":name",$name);
-        $cmd->bindValue(":birth",$birth);
-        $cmd->bindValue(":phone",$phone);
-        $cmd->bindValue(":cpf",$cpf);
-        $cmd->bindValue(":email",$email);
-        $cmd->bindValue(":address",$address);
-        // PDO::PARAM_NULL indica que observation pode ser null
-        $cmd->bindValue(":observation",$observation, PDO::PARAM_NULL);
-
-        $cmd->execute();
-        //fechando conexão por uma questão de segurança
-        $this->closeConnection($startConnection);
-        $response = array(
-            'status' => 200,
-            'message' => "User criado."
-        );
-        $json_response = json_encode($response);
-        return $json_response;
+        return $response;
     }
 
     public function show($id){
-        $startConnection = new Connect();
-        $query = 'SELECT * FROM clients WHERE id = :id';
-        $cmd = $startConnection->connection->prepare($query);
-
-        $cmd->bindValue(":id",$id);
-        $cmd->execute();
-        // fechando conexão por uma questão de segurança
-        $this->closeConnection($startConnection);
-        $client = $cmd->fetch(PDO::FETCH_OBJ);
-        if($client){
-            http_response_code(200);
-            $this->addHeaders();
-            die(json_encode($client));
-        }
-        else{
-            http_response_code(404);
-            $this->addHeaders();
-            $response = array(
-                'status' => 404,
-                'message' => "Não existe cliente com esse id."
-            );
-            $json_response = json_encode($response);
-            return $json_response;
+        try {
+            $clientService = new ClientService();
+            $clientService->findById($id);
+        } catch (Exception $th) {
+            return $th->getMessage();
         }
     }
 
@@ -390,3 +296,4 @@ class ClientController extends Controller
         }
     }
 }
+?>
