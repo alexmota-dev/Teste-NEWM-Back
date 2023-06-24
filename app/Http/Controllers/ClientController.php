@@ -23,8 +23,8 @@ class ClientController extends Controller
         try {
             $clientService = new ClientService();
             $client = $clientService->checkBodyIntegrity($body);
-            $clientService->emailIsUnique($client['email']);
-            $clientService->cpfIsUnique($client['cpf']);
+            $clientService->emailIsUniqueCreate($client['email']);
+            $clientService->cpfIsUniqueCreate($client['cpf']);
             $clientService->validatesSize($client);
             $response = $clientService->save($client);
         } catch (Exception $th) {
@@ -59,11 +59,11 @@ class ClientController extends Controller
         try {
             $clientService = new ClientService();
             $client = $clientService->checkBodyIntegrity($body);
-            $clientService->emailIsUnique($client['email']);
-            $clientService->cpfIsUnique($client['cpf']);
+            $clientService->emailIsUniqueUpdate($client['email']);
+            $clientService->cpfIsUniqueUpdate($client['cpf']);
             $clientService->validatesSize($client);
             $client["id"] = $id;
-            $response = $clientService->save($client);
+            $response = $clientService->update($client);
         } catch (Exception $th) {
             return $th->getMessage();
         }

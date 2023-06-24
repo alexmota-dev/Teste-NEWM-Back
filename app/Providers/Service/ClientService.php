@@ -62,7 +62,7 @@ class ClientService extends Exception{
     return $client;
     }
 
-    public function emailIsUnique($email){
+    public function emailIsUniqueUpdate($email){
         $clientWithSameEmail = $this->findByEmail($email);
         if($clientWithSameEmail && $clientWithSameEmail->email != $email){
             $response = array(
@@ -74,9 +74,33 @@ class ClientService extends Exception{
         }
     }
 
-    public function cpfIsUnique($cpf){
+    public function emailIsUniqueCreate($email){
+        $clientWithSameEmail = $this->findByEmail($email);
+        if($clientWithSameEmail){
+            $response = array(
+                'status' => 409,
+                'message' => "Já existe um cliente com este email !"
+            );
+            $json_response = json_encode($response, JSON_UNESCAPED_UNICODE);
+            throw new Exception($json_response);
+        }
+    }
+
+    public function cpfIsUniqueUpdate($cpf){
         $clientWithSameCPF = $this->findByCPF($cpf);
         if($clientWithSameCPF && $clientWithSameCPF->cpf != $cpf){
+            $response = array(
+                'status' => 409,
+                'message' => "Já existe um cliente com este CPF !"
+            );
+            $json_response = json_encode($response, JSON_UNESCAPED_UNICODE);
+            throw new Exception($json_response);
+        }
+    }
+
+    public function cpfIsUniqueCreate($cpf){
+        $clientWithSameCPF = $this->findByCPF($cpf);
+        if($clientWithSameCPF){
             $response = array(
                 'status' => 409,
                 'message' => "Já existe um cliente com este CPF !"
@@ -149,30 +173,28 @@ class ClientService extends Exception{
     public function save($client){
         try {
             $clientDatabase = new ClientRepository();
-            if(isset($client["id"])){
-                $existisClientWithSameId = $clientDatabase->findById($client["id"]);
-                if($existisClientWithSameId){
-                    //update
-                    $clientDatabase->update($client);
-                    $response = array(
-                        'status' => 200,
-                        'message' => 'Cliente atualizado com sucesso.'
-                    );
-                    $json_response = json_encode($response, JSON_UNESCAPED_UNICODE);
-                    $json_response;
-                }
-
-            }
-            else{
-                //create
-                $clientDatabase->create($client);
-                $response = array(
-                    'status' => 200,
-                    'message' => "User criado."
-                );
-                $json_response = json_encode($response, JSON_UNESCAPED_UNICODE);
-            }
+            $clientDatabase->create($client);
+            $response = array(
+                'status' => 200,
+                'message' => "Cliente criado com sucesso."
+            );
+            $json_response = json_encode($response, JSON_UNESCAPED_UNICODE);
         } catch (Exception $th) {
+            return $th->getMessage();
+        }
+        return $json_response;
+    }
+
+    public function update($client){
+        try {
+            $clientDatabase = new ClientRepository();
+            $clientDatabase->update($client);
+            $response = array(
+                'status' => 200,
+                'message' => 'Cliente atualizado com sucesso.'
+            );
+            $json_response = json_encode($response, JSON_UNESCAPED_UNICODE);
+        } catch (\Throwable $th) {
             return $th->getMessage();
         }
         return $json_response;

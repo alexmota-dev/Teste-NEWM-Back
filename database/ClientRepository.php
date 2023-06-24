@@ -19,7 +19,7 @@ class ClientRepository{
         $cmd->bindValue(":email",$client["email"]);
         $cmd->bindValue(":address",$client["address"]);
         // PDO::PARAM_NULL indica que observation pode ser null
-        $cmd->bindValue(":observation",$client["observation"], PDO::PARAM_NULL);
+        $cmd->bindValue(":observation",$client["observation"]);
         $cmd->execute();
         return $client;
     }
@@ -39,7 +39,7 @@ class ClientRepository{
         $cmd->bindValue(":email",$client["email"]);
         $cmd->bindValue(":address",$client["address"]);
         // PDO::PARAM_NULL indica que observation pode ser null
-        $cmd->bindValue(":observation",$client["observation"], PDO::PARAM_NULL);
+        $cmd->bindValue(":observation",$client["observation"]);
         $cmd->bindValue(":id",$client["id"]);
         $cmd->execute();
         return $client;
