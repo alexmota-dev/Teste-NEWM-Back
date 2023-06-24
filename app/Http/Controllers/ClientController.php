@@ -1,25 +1,13 @@
 <?php
 
 namespace App\Http\Controllers;
-require_once '../Database/Conection/Conection.php';
 use App\Providers\Service\ClientService;
-use Database\Conection\Connect;
 use Exception;
 use PDO;
 
 class ClientController extends Controller
 {
-    public function closeConnection($pdo){
-        $pdo = NULL;
-    }
-    //
-    public function addHeaders(){
-        //função para evitar erro de CORS
-        header('Content-Type: application/json');
-        header('Access-Control-Allow-Origin: *');
-        header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE');
-        header('Access-Control-Allow-Headers: Content-Type');
-    }
+
     public function index(){
         try {
             $clientService = new ClientService();
@@ -53,43 +41,6 @@ class ClientController extends Controller
             return $th->getMessage();
         }
         return $client;
-    }
-
-    public function findByEmail($email){
-        $startConnection = new Connect();
-        $query = 'SELECT * FROM clients WHERE email = :email';
-        $cmd = $startConnection->connection->prepare($query);
-        $cmd->bindValue(":email",$email);
-        $cmd->execute();
-        // fechando conexão por uma questão de segurança
-        $this->closeConnection($startConnection);
-        $client = $cmd->fetch(PDO::FETCH_OBJ);
-        if($client){
-            http_response_code(200);
-            // $this->addHeaders();
-            return $client;
-        }
-        else{
-            return 0;
-        }
-    }
-
-    public function findByCPF($cpf){
-        $startConnection = new Connect();
-        $query = 'SELECT * FROM clients WHERE cpf = :cpf';
-        $cmd = $startConnection->connection->prepare($query);
-        $cmd->bindValue(":cpf",$cpf);
-        $cmd->execute();
-        // fechando conexão por uma questão de segurança
-        $this->closeConnection($startConnection);
-        $client = $cmd->fetch(PDO::FETCH_OBJ);
-        if($client){
-            http_response_code(200);
-            return $client;
-        }
-        else{
-            return 0;
-        }
     }
 
     public function destroy($id){
