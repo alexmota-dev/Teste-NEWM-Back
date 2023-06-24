@@ -48,10 +48,11 @@ class ClientController extends Controller
     public function show($id){
         try {
             $clientService = new ClientService();
-            $clientService->findById($id);
+            $client = $clientService->findById($id);
         } catch (Exception $th) {
             return $th->getMessage();
         }
+        return $client;
     }
 
     public function findByEmail($email){
