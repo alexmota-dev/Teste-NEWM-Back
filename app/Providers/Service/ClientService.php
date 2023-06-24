@@ -146,15 +146,32 @@ class ClientService extends Exception{
         return $cpf;
     }
 
-    public function createClient($client){
+    public function save($client){
         try {
             $clientDatabase = new ClientRepository();
-            $clientDatabase->createClient($client);
-            $response = array(
-                'status' => 200,
-                'message' => "User criado."
-            );
-            $json_response = json_encode($response, JSON_UNESCAPED_UNICODE);
+            if(isset($client["id"])){
+                $existisClientWithSameId = $clientDatabase->findById($client["id"]);
+                if($existisClientWithSameId){
+                    //update
+                    $clientDatabase->updateClient($client);
+                    $response = array(
+                        'status' => 200,
+                        'message' => 'Cliente atualizado com sucesso.'
+                    );
+                    $json_response = json_encode($response, JSON_UNESCAPED_UNICODE);
+                    $json_response;
+                }
+
+            }
+            else{
+                //create
+                $clientDatabase->createClient($client);
+                $response = array(
+                    'status' => 200,
+                    'message' => "User criado."
+                );
+                $json_response = json_encode($response, JSON_UNESCAPED_UNICODE);
+            }
         } catch (Exception $th) {
             return $th->getMessage();
         }
