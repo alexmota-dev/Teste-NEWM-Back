@@ -23,6 +23,27 @@ class ClientRepository{
         return $client;
     }
 
+    public function updateClient($client){
+        $startConnection = new Connect();
+        $query ="UPDATE clients
+                SET name = :name, birth = :birth, phone = :phone, cpf = :cpf,
+                email = :email, address = :address, observation = :observation
+                WHERE id = :id";
+        $cmd = $startConnection->connection->prepare($query);
+
+        $cmd->bindValue(":name",$client["name"]);
+        $cmd->bindValue(":birth",$client["birth"]);
+        $cmd->bindValue(":phone",$client["phone"]);
+        $cmd->bindValue(":cpf",$client["cpf"]);
+        $cmd->bindValue(":email",$client["email"]);
+        $cmd->bindValue(":address",$client["address"]);
+        // PDO::PARAM_NULL indica que observation pode ser null
+        $cmd->bindValue(":observation",$client["observation"], PDO::PARAM_NULL);
+        $cmd->bindValue(":id",$client["id"]);
+        $cmd->execute();
+        return $client;
+    }
+
     public function findByAllClients(){
         $startConnection = new Connect;
         $query = "SELECT * FROM clients";
