@@ -99,8 +99,8 @@ class ClientService extends Exception{
     }
 
     public function findById($id){
-        $database = new ClientRepository();
-        $client = $database->findById($id);
+        $clientDatabase = new ClientRepository();
+        $client = $clientDatabase->findById($id);
         if($client){
             return $client;
         }
@@ -115,8 +115,8 @@ class ClientService extends Exception{
     }
 
     public function findByEmail($email){
-        $database = new ClientRepository();
-        $client = $database->findByEmail($email);
+        $clientDatabase = new ClientRepository();
+        $client = $clientDatabase->findByEmail($email);
         if($client){
             return $client;
         }
@@ -128,8 +128,8 @@ class ClientService extends Exception{
     }
 
     public function findByCPF($cpf){
-        $database = new ClientRepository();
-        $client = $database->findByCPF($cpf);
+        $clientDatabase = new ClientRepository();
+        $client = $clientDatabase->findByCPF($cpf);
         if($client){
             return $client;
         }
