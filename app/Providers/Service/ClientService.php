@@ -64,7 +64,7 @@ class ClientService extends Exception{
 
     public function emailIsUniqueUpdate($email){
         $clientWithSameEmail = $this->findByEmail($email);
-        if($clientWithSameEmail && $clientWithSameEmail->email != $email){
+        if($clientWithSameEmail && $clientWithSameEmail->email == $email){
             $response = array(
                 'status' => 409,
                 'message' => "Já existe um cliente com este email !"
@@ -88,7 +88,7 @@ class ClientService extends Exception{
 
     public function cpfIsUniqueUpdate($cpf){
         $clientWithSameCPF = $this->findByCPF($cpf);
-        if($clientWithSameCPF && $clientWithSameCPF->cpf != $cpf){
+        if($clientWithSameCPF && $clientWithSameCPF->cpf == $cpf){
             $response = array(
                 'status' => 409,
                 'message' => "Já existe um cliente com este CPF !"
