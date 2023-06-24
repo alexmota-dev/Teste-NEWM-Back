@@ -23,7 +23,7 @@ class ClientController extends Controller
     public function index(){
         try {
             $clientService = new ClientService();
-            $clients = $clientService->findAllClients();
+            $clients = $clientService->findAll();
             return(json_encode($clients));
         } catch (Exception $th) {
             return $th->getMessage();
@@ -140,36 +140,14 @@ class ClientController extends Controller
     }
 
     public function destroy($id){
-        $startConnection = new Connect();
-        $query = 'SELECT * FROM clients WHERE id = :id';
-        $cmd = $startConnection->connection->prepare($query);
-        $cmd->bindValue(":id",$id);
-        $cmd->execute();
-        $userExists = $cmd->fetch();
-        $cmd = null;
-
-        if($userExists){
-            $cmd = $startConnection->connection->prepare("DELETE FROM clients WHERE id = :id");
-            $cmd->bindValue(":id",$id);
-            $cmd->execute();
-            // fechando conexão por uma questão de segurança
-            $this->closeConnection($startConnection);
-            $response = array(
-                'status' => 200,
-                'message' => "User deletado com sucesso."
-            );
-            $json_response = json_encode($response);
-            return $json_response;
-        }else {
-            // fechando conexão por uma questão de segurança
-            $this->closeConnection($startConnection);
-            $response = array(
-                'status' => 200,
-                'message' => "Não existe user com o id". $id
-            );
-            $json_response = json_encode($response);
-            return $json_response;
+        try {
+            $clientService = new ClientService();
+            $response = $clientService->delete($id);
+        } catch (Exception $th) {
+            return $th->getMessage();
         }
+        return $response;
+
     }
 
     public function update($id){
