@@ -42,7 +42,7 @@ class ClientController extends Controller
             $clientService->emailIsUnique($client['email']);
             $clientService->cpfIsUnique($client['cpf']);
             $clientService->validatesSize($client);
-            $response = $clientService->createClient($client);
+            $response = $clientService->save($client);
         } catch (Exception $th) {
             return $th->getMessage();
         }
@@ -173,127 +173,19 @@ class ClientController extends Controller
     }
 
     public function update($id){
-        $startConnection = new Connect();
-        $query = 'SELECT * FROM clients WHERE id = :id';
-        $cmd = $startConnection->connection->prepare($query);
-        $cmd->bindValue(":id",$id);
-        $cmd->execute();
-        $userExists = $cmd->fetch();
-        if(!$userExists){
-            // fechando conexão por uma questão de segurança
-            $this->closeConnection($startConnection);
-            $response = array(
-                'status' => 404,
-                'message' => "Não existe cliente com o id ". $id
-            );
-            $json_response = json_encode($response);
-            return $json_response;
+        $body = json_decode(file_get_contents('php://input'), true);
+        try {
+            $clientService = new ClientService();
+            $client = $clientService->checkBodyIntegrity($body);
+            $clientService->emailIsUnique($client['email']);
+            $clientService->cpfIsUnique($client['cpf']);
+            $clientService->validatesSize($client);
+            $client["id"] = $id;
+            $response = $clientService->save($client);
+        } catch (Exception $th) {
+            return $th->getMessage();
         }
-
-        $jsonObj = json_decode(file_get_contents('php://input'), true);
-
-        if($jsonObj){
-            $name = $jsonObj["name"];
-            $birth = $jsonObj["birth"];
-            $phone = $jsonObj["phone"];
-            $cpf = $jsonObj["cpf"];
-            $email = $jsonObj["email"];
-            $address = $jsonObj["address"];
-            $observation = $jsonObj["observation"];
-            $birthArray = explode("-",$birth);
-
-            if($birthArray[1] > 12){
-                // fechando conexão por uma questão de segurança
-                $this->closeConnection($startConnection);
-                $response = array(
-                    'status' => 400,
-                    'message' => 'O mês não pode ultrapassar 12'
-                );
-                $json_response = json_encode($response);
-                return $json_response;
-            }
-            if($birthArray[2] > 31){
-                // fechando conexão por uma questão de segurança
-                $this->closeConnection($startConnection);
-                $response = array(
-                    'status' => 400,
-                    'message' => 'O dia não pode ultrapassar 31'
-                );
-                $json_response = json_encode($response);
-                return $json_response;
-            }
-            $alreadyExistsUserWithEmail = $this->findByEmail($email);
-            if($alreadyExistsUserWithEmail && $alreadyExistsUserWithEmail->email != $userExists["email"] ){
-                // fechando conexão por uma questão de segurança
-                $this->closeConnection($startConnection);
-                $response = array(
-                    'status' => 409,
-                    'message' => 'Já existe user com este email !'
-                );
-                $json_response = json_encode($response);
-                return $json_response;
-            }
-            $cpf = $this->verifyCPF($cpf);
-            $alreadyExistsUserWithCPF = $this->findByCPF($cpf);
-            if($alreadyExistsUserWithCPF && $alreadyExistsUserWithCPF->cpf != $userExists["cpf"] ){
-                // fechando conexão por uma questão de segurança
-                $this->closeConnection($startConnection);
-                $response = array(
-                    'status' => 409,
-                    'message' => 'Já existe user com este CPF !'
-                );
-                $json_response = json_encode($response);
-                return $json_response;
-            }
-            //verifica o tamanho de todos os campos
-            if(strlen($phone) > 11 || strlen($cpf) > 11 || strlen($name) > 50 || strlen($email) > 50 || strlen($address) > 50 || strlen($observation) > 300){
-                // fechando conexão por uma questão de segurança
-                $this->closeConnection($startConnection);
-                $response = array(
-                    'status' => 400,
-                    'message' => 'Verifique o tamanho dos campos !'
-                );
-                $json_response = json_encode($response);
-                return $json_response;
-
-            }
-
-            $cmd = $startConnection->connection->
-            prepare(
-                    "UPDATE clients
-                    SET name = :name, birth = :birth, phone = :phone, cpf = :cpf, email = :email, address = :address, observation = :observation
-                    WHERE id = :id"
-                    );
-
-            $cmd->bindValue(":name",$name);
-            $cmd->bindValue(":birth",$birth);
-            $cmd->bindValue(":phone",$phone);
-            $cmd->bindValue(":cpf",$cpf);
-            $cmd->bindValue(":email",$email);
-            $cmd->bindValue(":address",$address);
-            $cmd->bindValue(":observation",$observation);
-            $cmd->bindValue(":id",$id);
-            $cmd->execute();
-
-            // fechando conexão por uma questão de segurança
-            $this->closeConnection($startConnection);
-            $response = array(
-                'status' => 200,
-                'message' => 'Cliente atualizado com sucesso.'
-            );
-            $json_response = json_encode($response);
-            return $json_response;
-        }else {
-            // fechando conexão por uma questão de segurança
-            $this->closeConnection($startConnection);
-            http_response_code(400);
-            $response = array(
-                'status' => 200,
-                'message' => 'Solicitação incorreta, corpo da requisição está ausente.'
-            );
-            $json_response = json_encode($response);
-            return $json_response;
-        }
+        return $response;
     }
 }
 ?>
