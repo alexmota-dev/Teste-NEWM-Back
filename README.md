@@ -12,8 +12,8 @@
 composer install
 ```
 
-## Crie um arquivo .env na raiz do projeto, copiando o conteúdo do arquivo .env.example.
-### Atenção os dados do .env que você vai criar na sua máquina podem ser diferentes dos dados que eu uso na minha, contanto que sejam condizentes com os dados do banco
+### Crie um arquivo .env na raiz do projeto, copiando o conteúdo do arquivo .env.example.
+### Atenção os dados do .env que você vai criar na sua máquina podem ser diferentes dos dados que eu uso na minha, contanto que sejam condizentes com os dados do seu banco.
 
 ## Gere uma nova chave criptografica
 ```bash
@@ -22,6 +22,6 @@ php artisan key:generate
 ### Este comando não vai influenciar diretamente no processo de execução de uma aplicação simples como essa, mas mesmo assim é importante mantermos a segurança.
 ## Iniciar o Projeto
 ```bash
-php artisan serve
+app php artisan serve
 ```
 
