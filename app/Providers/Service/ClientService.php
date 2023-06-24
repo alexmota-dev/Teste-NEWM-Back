@@ -153,7 +153,7 @@ class ClientService extends Exception{
                 $existisClientWithSameId = $clientDatabase->findById($client["id"]);
                 if($existisClientWithSameId){
                     //update
-                    $clientDatabase->updateClient($client);
+                    $clientDatabase->update($client);
                     $response = array(
                         'status' => 200,
                         'message' => 'Cliente atualizado com sucesso.'
@@ -165,7 +165,7 @@ class ClientService extends Exception{
             }
             else{
                 //create
-                $clientDatabase->createClient($client);
+                $clientDatabase->create($client);
                 $response = array(
                     'status' => 200,
                     'message' => "User criado."
@@ -178,10 +178,28 @@ class ClientService extends Exception{
         return $json_response;
     }
 
-    public function findAllClients(){
+    public function delete($id){
         try {
             $clientDatabase = new ClientRepository();
-            $clients = $clientDatabase->findByAllClients();
+            $clientExistis = $clientDatabase->findById($id);
+            if($clientExistis){
+                $clientDatabase->delete($id);
+            }
+        } catch (\Throwable $th) {
+            //throw $th;
+        }
+        $response = array(
+            'status' => 200,
+            'message' => "User deletado com sucesso."
+        );
+        $json_response = json_encode($response, JSON_UNESCAPED_UNICODE);
+        return $json_response;
+    }
+
+    public function findAll(){
+        try {
+            $clientDatabase = new ClientRepository();
+            $clients = $clientDatabase->findByAll();
             return $clients;
         } catch (Exception $th) {
             return $th;
