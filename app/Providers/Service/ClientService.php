@@ -62,9 +62,9 @@ class ClientService extends Exception{
     return $client;
     }
 
-    public function emailIsUniqueUpdate($email){
-        $clientWithSameEmail = $this->findByEmail($email);
-        if($clientWithSameEmail && $clientWithSameEmail->email == $email){
+    public function emailIsUniqueUpdate($email,$id){
+        $idClient = $this->findIdByEmail($email);
+        if($idClient != $id && $idClient){
             $response = array(
                 'status' => 409,
                 'message' => "Já existe um cliente com este email !"
@@ -75,8 +75,8 @@ class ClientService extends Exception{
     }
 
     public function emailIsUniqueCreate($email){
-        $clientWithSameEmail = $this->findByEmail($email);
-        if($clientWithSameEmail){
+        $id = $this->findIdByEmail($email);
+        if($id){
             $response = array(
                 'status' => 409,
                 'message' => "Já existe um cliente com este email !"
@@ -86,9 +86,9 @@ class ClientService extends Exception{
         }
     }
 
-    public function cpfIsUniqueUpdate($cpf){
-        $clientWithSameCPF = $this->findByCPF($cpf);
-        if($clientWithSameCPF && $clientWithSameCPF->cpf == $cpf){
+    public function cpfIsUniqueUpdate($cpf,$id){
+        $idClient = $this->findIdByCPF($cpf);
+        if($idClient != $id && $idClient ){
             $response = array(
                 'status' => 409,
                 'message' => "Já existe um cliente com este CPF !"
@@ -99,8 +99,8 @@ class ClientService extends Exception{
     }
 
     public function cpfIsUniqueCreate($cpf){
-        $clientWithSameCPF = $this->findByCPF($cpf);
-        if($clientWithSameCPF){
+        $id = $this->findIdByCPF($cpf);
+        if($id){
             $response = array(
                 'status' => 409,
                 'message' => "Já existe um cliente com este CPF !"
@@ -138,11 +138,11 @@ class ClientService extends Exception{
         }
     }
 
-    public function findByEmail($email){
+    public function findIdByEmail($email){
         $clientDatabase = new ClientRepository();
-        $client = $clientDatabase->findByEmail($email);
-        if($client){
-            return $client;
+        $id = $clientDatabase->findIdByEmail($email);
+        if($id){
+            return $id;
         }
         else{
             /*Não posso retornar uma response aqui porque essa function só é usada aqui
@@ -151,11 +151,11 @@ class ClientService extends Exception{
         }
     }
 
-    public function findByCPF($cpf){
+    public function findIdByCPF($cpf){
         $clientDatabase = new ClientRepository();
-        $client = $clientDatabase->findByCPF($cpf);
-        if($client){
-            return $client;
+        $id = $clientDatabase->findIdByCPF($cpf);
+        if($id){
+            return $id;
         }
         else{
             /*Não posso retornar uma response aqui porque essa function só é usada aqui

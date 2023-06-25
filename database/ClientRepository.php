@@ -86,6 +86,22 @@ class ClientRepository{
         return $client;
     }
 
+    public function findIdByEmail($email){
+        $startConnection = new Connect();
+        $query = 'SELECT * FROM clients WHERE email = :email';
+        $cmd = $startConnection->connection->prepare($query);
+
+        $cmd->bindValue(":email",$email);
+        $cmd->execute();
+        $client = $cmd->fetch(PDO::FETCH_OBJ);
+        if($client){
+            return $client->id;
+        }
+        else{
+            return false;
+        }
+    }
+
     public function findByCPF($cpf){
         $startConnection = new Connect();
         $query = 'SELECT * FROM clients WHERE cpf = :cpf';
@@ -93,8 +109,24 @@ class ClientRepository{
 
         $cmd->bindValue(":cpf",$cpf);
         $cmd->execute();
-        $client = $cmd->fetch(PDO::FETCH_OBJ);
+        $client = $cmd->fetch(PDO::FETCH_ASSOC);
         return $client;
+    }
+
+    public function findIdByCPF($cpf){
+        $startConnection = new Connect();
+        $query = 'SELECT * FROM clients WHERE cpf = :cpf';
+        $cmd = $startConnection->connection->prepare($query);
+
+        $cmd->bindValue(":cpf",$cpf);
+        $cmd->execute();
+        $client = $cmd->fetch(PDO::FETCH_OBJ);
+        if($client){
+            return $client->id;
+        }
+        else{
+            return false;
+        }
     }
 }
 

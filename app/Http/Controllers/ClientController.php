@@ -59,8 +59,8 @@ class ClientController extends Controller
         try {
             $clientService = new ClientService();
             $client = $clientService->checkBodyIntegrity($body);
-            $clientService->emailIsUniqueUpdate($client['email']);
-            $clientService->cpfIsUniqueUpdate($client['cpf']);
+            $clientService->emailIsUniqueUpdate($client['email'], $id);
+            $clientService->cpfIsUniqueUpdate($client['cpf'],$id);
             $clientService->validatesSize($client);
             $client["id"] = $id;
             $response = $clientService->update($client);
